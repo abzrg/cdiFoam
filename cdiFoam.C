@@ -52,16 +52,24 @@ int main(int argc, char *argv[])
 
     Info<< "\nCalculating scalar transport\n" << endl;
 
-    Info<< "Time = " << runTime.timeName() << nl << endl;
+	while (simple.loop(runTime))
+	{
+		Info<< "Time = " << runTime.timeName() << nl << endl;
 
-    fvScalarMatrix cEqn
-    (
-        fvm::ddt(c)
-      - fvm::laplacian(De, c)
-    );
+		while (simple.correctNonOrthogonal())
+		{
+			fvScalarMatrix cEqn
+			(
+				fvm::ddt(c)
+			  - fvm::laplacian(De, c)
+			);
 
-    cEqn.relax();
-    cEqn.solve();
+			cEqn.relax();
+			cEqn.solve();
+		}
+
+        runTime.write();
+	}
 
     Info<< "End\n" << endl;
 
