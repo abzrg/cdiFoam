@@ -2,3 +2,4 @@
 *.o
 
 tags
+Make/linux64GccDPInt32Opt/*
