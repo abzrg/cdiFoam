@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 
     Info<< "\nCalculating scalar transport\n" << endl;
 
+    #include "CourantNo.H"
+
 	while (simple.loop(runTime))
 	{
 		Info<< "Time = " << runTime.timeName() << nl << endl;
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
 			fvScalarMatrix cEqn
 			(
 				fvm::ddt(c)
+              + fvm::div(phi, c)
 			  - fvm::laplacian(De, c)
 			);
 
@@ -69,10 +72,12 @@ int main(int argc, char *argv[])
 		}
 
         runTime.write();
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
 	}
+
+    Info<< endl;
+    Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
 
     Info<< "End\n" << endl;
 
