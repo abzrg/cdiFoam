@@ -172,30 +172,31 @@ IOdictionary electrochemicalProperties
 // Electrode voltage
 dimensionedScalar EV
 (
-    transportProperties.lookup("EV")
+    electrochemicalProperties.lookup("EV")
 );
 
 // Non-electrostatic adsorption parameter
 dimensionedScalar Mu
 (
-    transportProperties.lookup("Mu")
+    electrochemicalProperties.lookup("Mu")
 );
 
 // Stern layer (or microscopic) Capacitance
 dimensionedScalar CapSt
 (
-    transportProperties.lookup("CapSt")
+    electrochemicalProperties.lookup("CapSt")
 );
 
 // Thermal voltage
 dimensionedScalar VT
 (
-    transportProperties.lookup("VT")
+    electrochemicalProperties.lookup("VT")
 );
 
 // Faraday Constant
 dimensionedScalar F
 (
-    transportProperties.lookup("F")
+    electrochemicalProperties.lookup("F")
 );
+
 // vim: ft=foam
