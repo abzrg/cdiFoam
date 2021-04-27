@@ -56,9 +56,16 @@ int main(int argc, char *argv[])
     // Trigger the objects to store the old value of theirs at each iteration
     c.oldTime();
     p.oldTime();
+    pSt.oldTime();
+    pD.oldTime();
+    w.oldTime();
+    q.oldTime();
 
-    // Define a constant coefficient before the loop to only be calculated once
-    dimensionedScalar coeff = (Pmi/Pma) * (VT/De);
+    // Define constant coefficients before the loop to only be calculated once
+    dimensionedScalar coeff1 = (Pmi/Pma);
+    dimensionedScalar coeff2 = coeff1 * (VT/De);
+    dimensionedScalar coeff3 = -2 * F / CapSt;
+
 
 	while (simple.loop(runTime))
 	{
@@ -67,16 +74,16 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
 
         // Stern layer potential (Volt)
-        pSt = -2 * F * q.oldTime() / CapSt;
+        pSt = coeff3 * q;
 
         // Donan layer potential (Volt)
-        pD = EV - p.oldTime() - pSt.oldTime(); 
+        pD = EV - p - pSt; 
 
         // Charge density in the micropores (mol/m^3)
         q = -c * exp(Mu) * sinh(pD/VT);
 
         // Volumeteric ions concentration in micropores (mol/m^3)
-        w = c * exp(Mu) * cosh(pD);
+        w = c * exp(Mu) * cosh(pD/VT);
 
 		while (simple.correctNonOrthogonal())
 		{
@@ -85,7 +92,7 @@ int main(int argc, char *argv[])
 			(
 			  - fvm::laplacian(c, p)
               ==
-                coeff * fvc::ddt(q)
+                coeff2 * fvc::ddt(q)
 			);
 
             // Concentation Equation
@@ -95,7 +102,7 @@ int main(int argc, char *argv[])
 			  + 0.0001 * fvm::div(phi, c)
 			  - fvm::laplacian(De, c)
               ==
-                fvc::ddt(w)
+                coeff1 * fvc::ddt(w)
 			);
 
 			pEqn.relax();
@@ -118,4 +125,3 @@ int main(int argc, char *argv[])
 }
 
 // ************************************************************************* //
-// vim: ft=foam
