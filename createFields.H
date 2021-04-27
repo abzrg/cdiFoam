@@ -1,5 +1,6 @@
-Info<< "Reading field c\n" << endl;
+Info<< "Reading the field c\n" << endl;
 
+// Concentration of ions in the electrode
 volScalarField c
 (
     IOobject
@@ -12,6 +13,8 @@ volScalarField c
     ),
     mesh
 );
+
+Info<< "Reading the field q\n" << endl;
 
 // Micropore charge
 volScalarField q
@@ -27,6 +30,8 @@ volScalarField q
     mesh
 );
 
+Info<< "Reading the field w\n" << endl;
+
 // Micropore Consentration
 volScalarField w
 (
@@ -40,6 +45,8 @@ volScalarField w
     ),
     mesh
 );
+
+Info<< "Reading the field p\n" << endl;
 
 // Electrical potential of the macropore
 volScalarField p
@@ -55,6 +62,8 @@ volScalarField p
     mesh
 );
 
+Info<< "Reading the field pD\n" << endl;
+
 // Donan layer potential
 volScalarField pD
 (
@@ -69,6 +78,8 @@ volScalarField pD
     mesh
 );
 
+Info<< "Reading the field pSt\n" << endl;
+
 // Stern layer potential
 volScalarField pSt
 (
@@ -81,6 +92,36 @@ volScalarField pSt
         IOobject::NO_WRITE
     ),
     mesh
+);
+
+Info<< "Reading velocity vector U\n" << endl;
+
+volVectorField U
+(
+    IOobject
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+
+Info<< "Reading/calculating face flux field phi\n" << endl;
+
+surfaceScalarField phi
+(
+    IOobject
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    fvc::flux(U)
 );
 
 Info<< "Reading transportProperties: De, Pmi, and Pma\n" << endl;
@@ -156,35 +197,5 @@ dimensionedScalar VT
 dimensionedScalar F
 (
     transportProperties.lookup("F")
-);
-
-Info<< "Reading velocity vector U\n" << endl;
-
-volVectorField U
-(
-    IOobject
-    (
-        "U",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
-
-Info<< "Reading/calculating face flux field phi\n" << endl;
-
-surfaceScalarField phi
-(
-    IOobject
-    (
-        "phi",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    fvc::flux(U)
 );
 // vim: ft=foam
