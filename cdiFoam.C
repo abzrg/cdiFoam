@@ -52,25 +52,58 @@ int main(int argc, char *argv[])
 
     Info<< "\nCalculating scalar transport\n" << endl;
 
-    #include "CourantNo.H"
+
+    // Trigger the objects to store the old value of theirs at each iteration
+    c.oldTime();
+    p.oldTime();
+
+    // Define a constant coefficient before the loop to only be calculated once
+    dimensionedScalar coeff = (Pmi/Pma) * (VT/De);
 
 	while (simple.loop(runTime))
 	{
 		Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        #include "CourantNo.H"
+
+        // Stern layer potential (Volt)
+        pSt = -2 * F * q.oldTime() / CapSt;
+
+        // Donan layer potential (Volt)
+        pD = EV - p.oldTime() - pSt.oldTime(); 
+
+        // Charge density in the micropores (mol/m^3)
+        q = -c * exp(Mu) * sinh(pD/VT);
+
+        // Volumeteric ions concentration in micropores (mol/m^3)
+        w = c * exp(Mu) * cosh(pD);
+
 		while (simple.correctNonOrthogonal())
 		{
+            // Potential Equation
+			fvScalarMatrix pEqn
+			(
+			  - fvm::laplacian(c, p)
+              ==
+                coeff * fvc::ddt(q)
+			);
+
+            // Concentation Equation
 			fvScalarMatrix cEqn
 			(
-				fvm::ddt(c)
-              + fvm::div(phi, c)
+			    fvm::ddt(c)
+			  + 0.0001 * fvm::div(phi, c)
 			  - fvm::laplacian(De, c)
+              ==
+                fvc::ddt(w)
 			);
+
+			pEqn.relax();
+			pEqn.solve();
 
 			cEqn.relax();
 			cEqn.solve();
 		}
-
         runTime.write();
 	}
 
@@ -85,3 +118,4 @@ int main(int argc, char *argv[])
 }
 
 // ************************************************************************* //
+// ft=foam

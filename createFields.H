@@ -13,8 +13,77 @@ volScalarField c
     mesh
 );
 
+// Micropore charge
+volScalarField q
+(
+    IOobject
+    (
+        "q",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
 
-Info<< "Reading transportProperties\n" << endl;
+// Micropore Consentration
+volScalarField w
+(
+    IOobject
+    (
+        "w",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+// Electrical potential of the macropore
+volScalarField p
+(
+    IOobject
+    (
+        "p",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+// Donan layer potential
+volScalarField pD
+(
+    IOobject
+    (
+        "pD",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+// Stern layer potential
+volScalarField pSt
+(
+    IOobject
+    (
+        "pSt",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+Info<< "Reading transportProperties: De, Pmi, and Pma\n" << endl;
 
 IOdictionary transportProperties
 (
@@ -28,12 +97,65 @@ IOdictionary transportProperties
     )
 );
 
-
-Info<< "Reading diffusivity De\n" << endl;
-
+// Diffusivity in electrode
 dimensionedScalar De
 (
     transportProperties.lookup("De")
+);
+
+// Micro- and macro-pore porosity of the electrode
+dimensionedScalar Pmi
+(
+    transportProperties.lookup("Pmi")
+);
+
+dimensionedScalar Pma
+(
+    transportProperties.lookup("Pma")
+);
+
+Info<< "Reading Electro-Chemical Properties: CapSt, VT, F\n" << endl;
+
+IOdictionary electrochemicalProperties
+(
+    IOobject
+    (
+        "electrochemicalProperties",
+        runTime.constant(),
+        mesh,
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE
+    )
+);
+
+// Electrode voltage
+dimensionedScalar EV
+(
+    transportProperties.lookup("EV")
+);
+
+// Non-electrostatic adsorption parameter
+dimensionedScalar Mu
+(
+    transportProperties.lookup("Mu")
+);
+
+// Stern layer (or microscopic) Capacitance
+dimensionedScalar CapSt
+(
+    transportProperties.lookup("CapSt")
+);
+
+// Thermal voltage
+dimensionedScalar VT
+(
+    transportProperties.lookup("VT")
+);
+
+// Faraday Constant
+dimensionedScalar F
+(
+    transportProperties.lookup("F")
 );
 
 Info<< "Reading velocity vector U\n" << endl;
@@ -46,10 +168,9 @@ volVectorField U
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
-
 );
 
 Info<< "Reading/calculating face flux field phi\n" << endl;
@@ -66,3 +187,4 @@ surfaceScalarField phi
     ),
     fvc::flux(U)
 );
+// vim: ft=foam
