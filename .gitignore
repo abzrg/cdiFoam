@@ -1,6 +1,9 @@
+log
+tags
+Make/linux64GccDPInt32Opt/*
 *.dep
 *.o
 
-tags
-Make/linux64GccDPInt32Opt/*
-log
+# clangd
+.cache/
+compile_commands.json

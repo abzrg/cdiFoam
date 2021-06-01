@@ -30,7 +30,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-// Including some class definition and libraries ( Header files )
+// Including necessary class definition and libraries ( Header files )
 #include "fvCFD.H"
 #include "simpleControl.H"
 
@@ -38,8 +38,8 @@ Description
 
 int main(int argc, char *argv[])
 {
-	// Creating objects from the above defined classes
-	// These .H files are basically code snippets ( "inclusion" files )
+    // Creating objects from the above defined classes
+    // These .H files are basically code snippets ( "inclusion" files )
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -63,21 +63,48 @@ int main(int argc, char *argv[])
 
     // Define constant coefficients before the loop to only be calculated once
     dimensionedScalar coeff1 = (Pmi/Pma);
-    dimensionedScalar coeff2 = coeff1 * (VT/De);
+    dimensionedScalar coeff2 = 1e-9 * coeff1 * (VT/De);
     dimensionedScalar coeff3 = -2 * F / CapSt;
 
-
-	while (simple.loop(runTime))
-	{
-		Info<< "Time = " << runTime.timeName() << nl << endl;
+    while (simple.loop(runTime))
+    {
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "CourantNo.H"
+
+
+        // Potential Equation
+        fvScalarMatrix pEqn
+        (
+          - fvm::laplacian(c, p)
+          ==
+            coeff2 * fvc::ddt(q)
+        );
+
+        pEqn.relax();
+        pEqn.solve();
+
+        while (simple.correctNonOrthogonal())
+        {
+            // Concentation Equation
+            fvScalarMatrix cEqn
+            (
+                fvm::ddt(c)
+              // + 0.0001 * fvm::div(phi, c) // Small advection contrib.
+              - fvm::laplacian(De, c)
+              // ==
+              //   coeff1 * fvc::ddt(w)
+            );
+
+            cEqn.relax();
+            cEqn.solve();
+        }
 
         // Stern layer potential (Volt)
         pSt = coeff3 * q;
 
         // Donan layer potential (Volt)
-        pD = EV - p - pSt; 
+        pD = EV - p - pSt;
 
         // Charge density in the micropores (mol/m^3)
         q = -c * exp(Mu) * sinh(pD/VT);
@@ -85,34 +112,8 @@ int main(int argc, char *argv[])
         // Volumeteric ions concentration in micropores (mol/m^3)
         w = c * exp(Mu) * cosh(pD/VT);
 
-		while (simple.correctNonOrthogonal())
-		{
-            // Potential Equation
-			fvScalarMatrix pEqn
-			(
-			  - fvm::laplacian(c, p)
-              ==
-                coeff2 * fvc::ddt(q)
-			);
-
-            // Concentation Equation
-			fvScalarMatrix cEqn
-			(
-			    fvm::ddt(c)
-			  + 0.0001 * fvm::div(phi, c)
-			  - fvm::laplacian(De, c)
-              ==
-                coeff1 * fvc::ddt(w)
-			);
-
-			pEqn.relax();
-			pEqn.solve();
-
-			cEqn.relax();
-			cEqn.solve();
-		}
         runTime.write();
-	}
+    }
 
     Info<< endl;
     Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
