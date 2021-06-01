@@ -25,7 +25,7 @@ volScalarField q
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -41,7 +41,7 @@ volScalarField w
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -57,7 +57,7 @@ volScalarField p
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -73,7 +73,7 @@ volScalarField pD
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -89,7 +89,7 @@ volScalarField pSt
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
