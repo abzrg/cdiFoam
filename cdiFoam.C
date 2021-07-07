@@ -72,6 +72,14 @@ int main(int argc, char *argv[])
 
         #include "CourantNo.H"
 
+        // Stern layer potential (Volt)
+        pSt = -2 * F * q / CapSt;
+
+        // Donan layer potential (Volt)
+        pD = -1 * VT *asinh(q / (5 * c));
+
+        // Volumeteric ions concentration in micropores (mol/m^3)
+        w = sqrt(q * q + 4 * c * c);
 
         // Potential Equation
         fvScalarMatrix pEqn
@@ -92,25 +100,14 @@ int main(int argc, char *argv[])
                 fvm::ddt(c)
               // + 0.0001 * fvm::div(phi, c) // Small advection contrib.
               - fvm::laplacian(De, c)
-              // ==
-              //   coeff1 * fvc::ddt(w)
+              ==
+                coeff1 * fvc::ddt(w)
             );
 
             cEqn.relax();
             cEqn.solve();
         }
 
-        // Stern layer potential (Volt)
-        pSt = coeff3 * q;
-
-        // Donan layer potential (Volt)
-        pD = EV - p - pSt;
-
-        // Charge density in the micropores (mol/m^3)
-        q = -c * exp(Mu) * sinh(pD/VT);
-
-        // Volumeteric ions concentration in micropores (mol/m^3)
-        w = c * exp(Mu) * cosh(pD/VT);
 
         runTime.write();
     }
