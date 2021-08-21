@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    scalarTransportFoamCdi
+    cdiFoam
 
 Description
     Solves the steady or transient transport equation for a passive scalar.
@@ -72,21 +72,12 @@ int main(int argc, char *argv[])
 
         #include "CourantNo.H"
 
-        // Stern layer potential (Volt)
-        pSt = -2 * F * q / CapSt;
-
-        // Donan layer potential (Volt)
-        pD = -1 * VT *asinh(q / (5 * c));
-
-        // Volumeteric ions concentration in micropores (mol/m^3)
-        w = sqrt(q * q + 4 * c * c);
-
         // Potential Equation
         fvScalarMatrix pEqn
         (
           - fvm::laplacian(c, p)
           ==
-            coeff2 * fvc::ddt(q)
+            coeff2 * fvc::ddt(src_coeff_p, q)
         );
 
         pEqn.relax();
@@ -94,19 +85,42 @@ int main(int argc, char *argv[])
 
         while (simple.correctNonOrthogonal())
         {
-            // Concentation Equation
+            // Concentration Equation
             fvScalarMatrix cEqn
             (
                 fvm::ddt(c)
-              // + 0.0001 * fvm::div(phi, c) // Small advection contrib.
-              - fvm::laplacian(De, c)
+              + coeff_conv * fvm::div(phi, c)
+              // - fvm::laplacian(De, c)
+              - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
+              - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
               ==
-                coeff1 * fvc::ddt(w)
+                coeff1 * fvc::ddt(src_coeff_c, w)
             );
 
             cEqn.relax();
             cEqn.solve();
+
         }
+
+        // q = -c * exp(Mu) * sinh(pD/VT);
+        // // Stern layer potential (Volt)
+        // pSt = -2 * F * q / CapSt;
+        // // Donan layer potential (Volt)
+        // pD = -1 * VT *asinh(q/ (5 * c));
+        // // Volumeteric ions concentration in micropores (mol/m^3)
+        // w = sqrt(q * q + 4 * c * c);
+        // // Electrical potential
+        // // p = EV - pD - pSt;
+
+        q = -c * exp(Mu) * sinh(pD/VT);
+        // Stern layer potential (Volt)
+        pSt = coeff3 * q;
+        // Donan layer potential (Volt)
+        pD = -1 * max(p) + EV - max(pSt);
+        // Charge density in the micropores (mol/m^3)
+        // Volumetric ions concentration in micropores (mol/m^3)
+        //w = c * exp(Mu) * cosh(pD/VT);
+        w = sqrt(q * q + 4 * c * c);
 
 
         runTime.write();

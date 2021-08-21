@@ -109,6 +109,71 @@ volVectorField U
     mesh
 );
 
+volScalarField coeff_conv
+(
+    IOobject
+    (
+        "coeff_conv",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+volScalarField coeff_diff_1
+(
+    IOobject
+    (
+        "coeff_diff_1",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+volScalarField coeff_diff_2
+(
+    IOobject
+    (
+        "coeff_diff_2",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+volScalarField src_coeff_p
+(
+    IOobject
+    (
+        "src_coeff_p",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
+volScalarField src_coeff_c
+(
+    IOobject
+    (
+        "src_coeff_c",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
+
 Info<< "Reading/calculating face flux field phi\n" << endl;
 
 surfaceScalarField phi
@@ -143,6 +208,11 @@ dimensionedScalar De
 (
     transportProperties.lookup("De")
 );
+
+// dimensionedScalar D
+// (
+//     transportProperties.lookup("D")
+// );
 
 // Micro- and macro-pore porosity of the electrode
 dimensionedScalar Pmi
@@ -198,5 +268,3 @@ dimensionedScalar F
 (
     electrochemicalProperties.lookup("F")
 );
-
-// vim: ft=foam
