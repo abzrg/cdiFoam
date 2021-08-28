@@ -74,11 +74,11 @@ int main(int argc, char *argv[])
 
         // Potential Equation
         fvScalarMatrix pEqn
-        (
-          - fvm::laplacian(c, p)
-          ==
-            coeff2 * fvc::ddt(src_coeff_p, q)
-        );
+            (
+             - fvm::laplacian(c, p)
+             ==
+             coeff2 * fvc::ddt(q)
+            );
 
         pEqn.relax();
         pEqn.solve();
@@ -87,41 +87,25 @@ int main(int argc, char *argv[])
         {
             // Concentration Equation
             fvScalarMatrix cEqn
-            (
-                fvm::ddt(c)
-              + coeff_conv * fvm::div(phi, c)
-              // - fvm::laplacian(De, c)
-              - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
-              - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
-              ==
-                coeff1 * fvc::ddt(src_coeff_c, w)
-            );
+                (
+                 fvm::ddt(c)
+                 + coeff_conv * fvm::div(phi, c)
+                 - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
+                 - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
+                 ==
+                 coeff1 * fvc::ddt(w)
+                );
 
             cEqn.relax();
             cEqn.solve();
 
         }
 
-        // q = -c * exp(Mu) * sinh(pD/VT);
-        // // Stern layer potential (Volt)
-        // pSt = -2 * F * q / CapSt;
-        // // Donan layer potential (Volt)
-        // pD = -1 * VT *asinh(q/ (5 * c));
-        // // Volumeteric ions concentration in micropores (mol/m^3)
-        // w = sqrt(q * q + 4 * c * c);
-        // // Electrical potential
-        // // p = EV - pD - pSt;
-
-        q = -c * exp(Mu) * sinh(pD/VT);
-        // Stern layer potential (Volt)
+        q = src_coeff_p * (-c) * exp(Mu) * sinh(pD/VT);
         pSt = coeff3 * q;
-        // Donan layer potential (Volt)
-        pD = -1 * max(p) + EV - max(pSt);
-        // Charge density in the micropores (mol/m^3)
-        // Volumetric ions concentration in micropores (mol/m^3)
+        pD = max(-1 * src_coeff_p * p + EV * src_coeff_c - pSt);
         //w = c * exp(Mu) * cosh(pD/VT);
-        w = sqrt(q * q + 4 * c * c);
-
+        w = sqrt(q * q + 4 * src_coeff_c * c * c);
 
         runTime.write();
     }
