@@ -62,21 +62,21 @@ volScalarField p
     mesh
 );
 
-Info<< "Reading the field pD\n" << endl;
+// Info<< "Reading the field pD\n" << endl;
 
-// Donan layer potential
-volScalarField pD
-(
-    IOobject
-    (
-        "pD",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
+// // Donan layer potential
+// volScalarField pD
+// (
+//     IOobject
+//     (
+//         "pD",
+//         runTime.timeName(),
+//         mesh,
+//         IOobject::MUST_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     mesh
+// );
 
 Info<< "Reading the field pSt\n" << endl;
 
@@ -267,4 +267,10 @@ dimensionedScalar VT
 dimensionedScalar F
 (
     electrochemicalProperties.lookup("F")
+);
+
+// Donan potential
+dimensionedScalar pD
+(
+    electrochemicalProperties.lookup("pD")
 );

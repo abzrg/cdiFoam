@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     c.oldTime();
     p.oldTime();
     pSt.oldTime();
-    pD.oldTime();
+    // pD.oldTime();
     w.oldTime();
     q.oldTime();
 
