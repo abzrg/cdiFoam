@@ -34,6 +34,9 @@ Description
 #include "fvCFD.H"
 #include "simpleControl.H"
 
+// handler for printing stuff
+#define print(X) Info << X << endl
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -51,7 +54,6 @@ int main(int argc, char *argv[])
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nCalculating scalar transport\n" << endl;
-
 
     // Trigger the objects to store the old value of theirs at each iteration
     c.oldTime();
