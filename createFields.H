@@ -14,37 +14,6 @@ volScalarField c
     mesh
 );
 
-Info<< "Reading the field q\n" << endl;
-
-// Micropore charge
-volScalarField q
-(
-    IOobject
-    (
-        "q",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
-
-Info<< "Reading the field w\n" << endl;
-
-// Micropore Consentration
-volScalarField w
-(
-    IOobject
-    (
-        "w",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
 
 Info<< "Reading the field p\n" << endl;
 
@@ -62,30 +31,14 @@ volScalarField p
     mesh
 );
 
-// Info<< "Reading the field pD\n" << endl;
+Info<< "Reading the field pD\n" << endl;
 
-// // Donan layer potential
-// volScalarField pD
-// (
-//     IOobject
-//     (
-//         "pD",
-//         runTime.timeName(),
-//         mesh,
-//         IOobject::MUST_READ,
-//         IOobject::AUTO_WRITE
-//     ),
-//     mesh
-// );
-
-Info<< "Reading the field pSt\n" << endl;
-
-// Stern layer potential
-volScalarField pSt
+// Donan layer potential
+volScalarField pD
 (
     IOobject
     (
-        "pSt",
+        "pD",
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
@@ -269,8 +222,3 @@ dimensionedScalar F
     electrochemicalProperties.lookup("F")
 );
 
-// Donan potential
-dimensionedScalar pD
-(
-    electrochemicalProperties.lookup("pD")
-);

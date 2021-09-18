@@ -58,15 +58,12 @@ int main(int argc, char *argv[])
     // Trigger the objects to store the old value of theirs at each iteration
     c.oldTime();
     p.oldTime();
-    pSt.oldTime();
-    // pD.oldTime();
-    w.oldTime();
-    q.oldTime();
+    pD.oldTime();
 
-    // Define constant coefficients before the loop to only be calculated once
+    // // Define constant coefficients before the loop to only be calculated once
     dimensionedScalar coeff1 = (Pmi/Pma);
-    dimensionedScalar coeff2 = 1e-9 * coeff1 * (VT/De);
-    dimensionedScalar coeff3 = -2 * F / CapSt;
+    // dimensionedScalar coeff2 = 1e-9 * coeff1 * (VT/De);
+    // dimensionedScalar coeff3 = -2 * F / CapSt;
 
     while (simple.loop(runTime))
     {
@@ -79,14 +76,39 @@ int main(int argc, char *argv[])
             (
              - fvm::laplacian(c, p)
              ==
-             coeff2 * fvc::ddt(q)
+              (-1) * src_coeff_p
+                   * coeff1
+                   * exp(Mu)
+                   * (VT/De)
+                   * (
+                         sinh(pD/VT) * fvc::ddt(c)
+                       + c * cosh(pD/VT) * fvc::ddt(pD) / VT
+                     )
             );
 
         pEqn.relax();
         pEqn.solve();
 
+        fvScalarMatrix pDEqn
+            (
+             fvc::ddt(p)
+             + fvm::ddt(pD)
+             ==
+             (+2) * src_coeff_p
+                  * F / CapSt
+                  * exp(Mu)
+                  * (
+                        (c / VT * cosh(pD/VT) * fvm::ddt(pD))
+                      + sinh(pD/VT) * fvc::ddt(c)
+                    )
+            );
+
+        pDEqn.relax();
+        pDEqn.solve();
+
         while (simple.correctNonOrthogonal())
         {
+
             // Concentration Equation
             fvScalarMatrix cEqn
                 (
@@ -95,19 +117,18 @@ int main(int argc, char *argv[])
                  - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
                  - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
                  ==
-                 coeff1 * fvc::ddt(w)
+                 (-1) * src_coeff_c
+                      * exp(Mu)
+                      * coeff1
+                      * (
+                            cosh(pD/VT) * fvc::ddt(c)
+                          + c * sinh(pD/VT) * fvc::ddt(pD) / VT
+                        )
                 );
 
             cEqn.relax();
             cEqn.solve();
-
         }
-
-        q = src_coeff_p * (-c) * exp(Mu) * sinh(pD/VT);
-        pSt = coeff3 * q;
-        pD = max(-1 * src_coeff_p * p + EV * src_coeff_c - pSt);
-        //w = c * exp(Mu) * cosh(pD/VT);
-        w = sqrt(q * q + 4 * src_coeff_c * c * c);
 
         runTime.write();
     }
