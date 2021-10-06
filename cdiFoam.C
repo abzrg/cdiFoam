@@ -73,10 +73,10 @@ int main(int argc, char *argv[])
 
         // Potential Equation
         fvScalarMatrix pEqn
-            (
+        (
              - fvm::laplacian(c, p)
              ==
-              (-1) * src_coeff_p
+              (-2) * src_coeff_p
                    * coeff1
                    * exp(Mu)
                    * (VT/De)
@@ -84,13 +84,13 @@ int main(int argc, char *argv[])
                          sinh(pD/VT) * fvc::ddt(c)
                        + c * cosh(pD/VT) * fvc::ddt(pD) / VT
                      )
-            );
+        );
 
         pEqn.relax();
         pEqn.solve();
 
         fvScalarMatrix pDEqn
-            (
+        (
              fvc::ddt(p)
              + fvm::ddt(pD)
              ==
@@ -101,31 +101,29 @@ int main(int argc, char *argv[])
                         (c / VT * cosh(pD/VT) * fvm::ddt(pD))
                       + sinh(pD/VT) * fvc::ddt(c)
                     )
-            );
+        );
 
         pDEqn.relax();
         pDEqn.solve();
 
         while (simple.correctNonOrthogonal())
         {
-
             // Concentration Equation
             fvScalarMatrix cEqn
-                (
+            (
                  fvm::ddt(c)
                  + coeff_conv * fvm::div(phi, c)
                  - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
                  - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
                  ==
-                 (-1) * src_coeff_c
+                 (-2) * src_coeff_c
                       * exp(Mu)
                       * coeff1
                       * (
                             cosh(pD/VT) * fvc::ddt(c)
                           + c * sinh(pD/VT) * fvc::ddt(pD) / VT
                         )
-                );
-
+            );
             cEqn.relax();
             cEqn.solve();
         }
