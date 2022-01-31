@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         (
              - fvm::laplacian(c, p)
              ==
-              (-2) * src_coeff_p
+              (-1) * src_coeff_p
                    * coeff1
                    * exp(Mu)
                    * (VT/De)
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
              fvc::ddt(p)
              + fvm::ddt(pD)
              ==
-             (+2) * src_coeff_p
+             (-2) * src_coeff_p
                   * F / CapSt
                   * exp(Mu)
                   * (
@@ -116,9 +116,7 @@ int main(int argc, char *argv[])
                  - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
                  - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
                  ==
-                 (-2) * src_coeff_c
-                      * exp(Mu)
-                      * coeff1
+                 (-1) * src_coeff_c * exp(Mu) * coeff1
                       * (
                             cosh(pD/VT) * fvc::ddt(c)
                           + c * sinh(pD/VT) * fvc::ddt(pD) / VT
