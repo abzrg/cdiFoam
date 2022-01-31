@@ -61,9 +61,7 @@ int main(int argc, char *argv[])
     pD.oldTime();
 
     // // Define constant coefficients before the loop to only be calculated once
-    dimensionedScalar coeff1 = (Pmi/Pma);
-    // dimensionedScalar coeff2 = 1e-9 * coeff1 * (VT/De);
-    // dimensionedScalar coeff3 = -2 * F / CapSt;
+    dimensionedScalar porosityRatio = (Pmi/Pma);
 
     while (simple.loop(runTime))
     {
@@ -71,13 +69,13 @@ int main(int argc, char *argv[])
 
         #include "CourantNo.H"
 
-        // Potential Equation
+        // Electrical Potential (p)
         fvScalarMatrix pEqn
         (
              - fvm::laplacian(c, p)
              ==
-              (-1) * src_coeff_p
-                   * coeff1
+              (-1) * src_coeff_p    // This must be a positive term
+                   * porosityRatio
                    * exp(Mu)
                    * (VT/De)
                    * (
@@ -89,12 +87,13 @@ int main(int argc, char *argv[])
         pEqn.relax();
         pEqn.solve();
 
+        // Donnan Potential (pD)
         fvScalarMatrix pDEqn
         (
              fvc::ddt(p)
              + fvm::ddt(pD)
              ==
-             (-2) * src_coeff_p
+             (-2) * src_coeff_c     // This must be a negative term
                   * F / CapSt
                   * exp(Mu)
                   * (
@@ -108,20 +107,21 @@ int main(int argc, char *argv[])
 
         while (simple.correctNonOrthogonal())
         {
-            // Concentration Equation
+            // Ion concentration (c)
             fvScalarMatrix cEqn
             (
                  fvm::ddt(c)
                  + coeff_conv * fvm::div(phi, c)
-                 - coeff_diff_1 * fvm::laplacian(De, c) // spacer *2 : *0
-                 - coeff_diff_2 * fvm::laplacian(De, c) // electrode *0 : *1
+                 - coeff_diff_1 * fvm::laplacian(De, c)         // spacer *2 : *0
+                 - coeff_diff_2 * fvm::laplacian(De, c)         // electrode *0 : *1
                  ==
-                 (-1) * src_coeff_c * exp(Mu) * coeff1
+                 (-1) * src_coeff_c * exp(Mu) * porosityRatio   // This must be a negative term
                       * (
                             cosh(pD/VT) * fvc::ddt(c)
                           + c * sinh(pD/VT) * fvc::ddt(pD) / VT
                         )
             );
+
             cEqn.relax();
             cEqn.solve();
         }
