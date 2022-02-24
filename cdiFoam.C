@@ -87,19 +87,19 @@ int main(int argc, char *argv[])
         pEqn.relax();
         pEqn.solve();
 
+        dimensionedScalar dummy_coeff(1e-9);
+        volScalarField pD_coeff(2 * src_coeff_c * (F / CapSt) * (c / VT) * cosh(pD/VT));
+
         // Donnan Potential (pD)
         fvScalarMatrix pDEqn
         (
-             fvc::ddt(p)
-             + fvm::ddt(pD)
+             fvm::ddt(1+pD_coeff,pD)
+             // + src_coeff_c * dummy_coeff * fvm::laplacian(De,pD) // volt * m^2 / s / m^2
              ==
-             (-2) * src_coeff_c     // This must be a negative term
-                  * F / CapSt
-                  * exp(Mu)
-                  * (
-                        (c / VT * cosh(pD/VT) * fvm::ddt(pD))
-                      + sinh(pD/VT) * fvc::ddt(c)
-                    )
+             // src_coeff_c  *  dummy_coeff * fvc::laplacian(De,pD)
+             - fvc::ddt(p)
+             -2 * src_coeff_c     // This must be a negative term
+                  * F / CapSt * exp(Mu) * sinh(pD/VT) * fvc::ddt(c)
         );
 
         pDEqn.relax();
@@ -107,18 +107,19 @@ int main(int argc, char *argv[])
 
         while (simple.correctNonOrthogonal())
         {
+            volScalarField c_coeff(src_coeff_c * exp(Mu) * porosityRatio * cosh(pD/VT));
+
             // Ion concentration (c)
             fvScalarMatrix cEqn
             (
-                 fvm::ddt(c)
+                 fvm::ddt(1+c_coeff,c)
                  + coeff_conv * fvm::div(phi, c)
                  - coeff_diff_1 * fvm::laplacian(De, c)         // spacer *2 : *0
                  - coeff_diff_2 * fvm::laplacian(De, c)         // electrode *0 : *1
                  ==
                  (-1) * src_coeff_c * exp(Mu) * porosityRatio   // This must be a negative term
                       * (
-                            cosh(pD/VT) * fvc::ddt(c)
-                          + c * sinh(pD/VT) * fvc::ddt(pD) / VT
+                          c * sinh(pD/VT) * fvc::ddt(pD) / VT
                         )
             );
 
