@@ -1,8 +1,9 @@
 log
 tags
-Make/linux64GccDPInt32Opt/*
+Make/**/*
 *.dep
 *.o
+*patch
 
 # clangd
 .cache/
