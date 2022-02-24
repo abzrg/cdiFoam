@@ -70,7 +70,7 @@ volScalarField coeff_conv
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -83,7 +83,7 @@ volScalarField coeff_diff_1
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -96,7 +96,7 @@ volScalarField coeff_diff_2
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -109,7 +109,7 @@ volScalarField src_coeff_p
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
@@ -122,7 +122,7 @@ volScalarField src_coeff_c
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh
 );
