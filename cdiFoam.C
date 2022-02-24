@@ -94,9 +94,9 @@ int main(int argc, char *argv[])
         fvScalarMatrix pDEqn
         (
              fvm::ddt(1+pD_coeff,pD)
-             // + src_coeff_c * dummy_coeff * fvm::laplacian(De,pD) // volt * m^2 / s / m^2
+             + src_coeff_c * dummy_coeff * fvm::laplacian(De,pD) // volt * m^2 / s / m^2
              ==
-             // src_coeff_c  *  dummy_coeff * fvc::laplacian(De,pD)
+             src_coeff_c  *  dummy_coeff * fvc::laplacian(De,pD)
              - fvc::ddt(p)
              -2 * src_coeff_c     // This must be a negative term
                   * F / CapSt * exp(Mu) * sinh(pD/VT) * fvc::ddt(c)
